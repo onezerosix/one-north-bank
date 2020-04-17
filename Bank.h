@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <bitset>
 #include <math.h>
+#include <memory>
 #include "Account.h"
 #include "Utilities.h"
 //#include "Cipher.h" // TODO
@@ -40,8 +41,8 @@ private:
 public:
     Bank(string ra_file_name);
 
-    Account* login();
-    Account* createAccount();
+    unique_ptr<Account> login();
+    unique_ptr<Account> createAccount();
     bool closeAccount(Account &account);
 
     void displayBalance(Account account);
@@ -100,12 +101,19 @@ Bank::Bank(string ra_file_name) {
 //      int representing the id that was just reserved
 // =============================================================================
 int Bank::reserveNextAvailableId() {
-    if (available_ids == 0) {
+    if (available_ids.none()) {
         // TODO: error?
+        cout << "No available ids\n";
+        exit(-10);
     }
 
-    int id = (int)log2(available_ids.to_ullong());
-    available_ids.set(id, false);
+    int id;
+    for (id = 0; id < MAX_RECORDS; id++) {
+        if (available_ids[id]) {
+            available_ids.set(id, false);
+            break;
+        }
+    }
 
     return (id + 1) * 10;
 }
@@ -145,6 +153,10 @@ void Bank::updateFile(Account account, bool update_available_ids /*= false*/,
     ra_file.open(ra_fname, ios::in | ios::binary);
 
     // TODO: check if open failed?
+    if (ra_file.fail()) {
+        cout << "Openning file failed\n";
+        exit(-10);
+    }
 
     if (update_available_ids) {
         ra_file.write((char*)&available_ids, sizeof(available_ids));
@@ -197,7 +209,7 @@ int Bank::calculateOffset(Account account, bool include_available_ids /*= true*/
 //      pointer to account of the user if it was able to be located, otherwise
 //      nullptr
 // =============================================================================
-Account* Bank::login() {
+unique_ptr<Account> Bank::login() {
     int id;
     if (!get(id, "Enter your id: ")) {
         // TODO: failed input error
@@ -222,10 +234,10 @@ Account* Bank::login() {
     // TODO: move calculation to dif func?
     int byte_offset = calculateOffset(login);
 
-    Account* account = new Account();
+    unique_ptr<Account> account(new Account());
     ra_file.open(ra_fname, ios::in | ios::binary);
     ra_file.seekp(byte_offset, ios::beg);
-    ra_file.read((char*)account, sizeof(Account));
+    ra_file.read((char*)account.get(), sizeof(Account));
     ra_file.close();
 
     if (strcmp(login.name, account->name) != 0) {
@@ -245,13 +257,13 @@ Account* Bank::login() {
 // Output:
 //      pointer to the account that was created, otherwise nullptr
 // =============================================================================
-Account* Bank::createAccount() {
+unique_ptr<Account> Bank::createAccount() {
     int id = reserveNextAvailableId();
 
-    Account* account = new Account(id);
+    unique_ptr<Account> account(new Account(id));
 
     string name; // TODO: same as login above
-    if (!get(name, "Enter your user name: ")) {
+    if (!get(name, "Enter your name: ")) {
         // TODO; failed input error
         return nullptr;
     }
@@ -269,6 +281,7 @@ Account* Bank::createAccount() {
 
     updateFile(*account, true);
     
+    cout << "Your id is: " << account->id << endl;
     displayBalance(*account);
     return account;
 }

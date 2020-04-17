@@ -28,7 +28,6 @@ private:
 
     Account();
     Account(int id);
-    // ~Account(); // TODO: this due to Bank using new?
 
     void reset();
     bool setName(string new_name);
