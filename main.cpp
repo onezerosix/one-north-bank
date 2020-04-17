@@ -6,47 +6,47 @@
 // =============================================================================
 
 #include <iostream>
+#include <memory>
 #include "Bank.h"
 using namespace std;
 
 // global variable
 static const string BANK_NAME = "One North Bank";
 static const string RAF_NAME = "accounts.raf";
-static const enum loginOptions = { // TODO: this..
-    quit = 0,
-    create_account = 1,
-    login = 2
-}
+// static const enum loginOptions = { // TODO: this..
+//     quit = 0,
+//     create_account = 1,
+//     login = 2
+// };
 
 // function prototypes
 int main();
-void promptMenu();
-bool loginRequested();
+void promptMenu(Bank &bank, Account &account);
+int loginRequested();
 
 // ==== main ===================================================================
 //
 // =============================================================================
 int main() {
-    // TODO: this means you don't have to call delete (like new)?
-    Bank bank = { RAF_NAME };
+    Bank bank(RAF_NAME);
 
     int selection;
-    Account account = NULL;
+    unique_ptr<Account> account = nullptr;
 
     while (selection = loginRequested()) {
         // TODO: probably a try catch
-        if (selection == loginOptions::create_account) {
+        if (selection == 1) {
             account = bank.createAccount();
         }
         else {
             account = bank.login();
         }
-        if (account == NULL) {
+        if (account == nullptr) {
             // TODO: error msg
             continue;
         }
 
-        promptMenu(bank, account)
+        promptMenu(bank, *account);
     }
 
     cout << "Goodbye!\n";
@@ -67,7 +67,7 @@ void promptMenu(Bank &bank, Account &account) { // TODO: this function
             << "4. Close account\n"
             << "5. Logout\n\n";
 
-        made_selection = get(selection, -1, "Enter your menu choice: ");
+        get(selection, -1, "Enter your menu choice: ");
 
         switch (selection) {
             case 1:
@@ -80,7 +80,7 @@ void promptMenu(Bank &bank, Account &account) { // TODO: this function
                 bank.withdraw(account);
                 break;
             case 4:
-                bank.close(account);
+                bank.closeAccount(account);
                 logging_out = true;
                 break;
             case 5:
@@ -106,7 +106,7 @@ int loginRequested() {
     int selection;
 
     while (!made_selection) {
-        cout << "---------------------" << bankName << "-----------------\n"
+        cout << "---------------------" << BANK_NAME << "-----------------\n"
             << "1. Create account\n"
             << "2. Login\n"
             << "3. Quit\n";
@@ -121,7 +121,7 @@ int loginRequested() {
                 selection = 0;
                 break;
             default:
-                cout << "Invaild, try again";
+                cout << "Invaild, try again\n";
                 made_selection = false;
                 break;
         }
@@ -129,5 +129,5 @@ int loginRequested() {
         cout << endl;
     }
 
-    return (loginOptions)selection; // TODO: not sure how to do this..
+    return selection;
 }
