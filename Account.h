@@ -8,120 +8,127 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-#include <string.h>
+#include <string>
+#include <cstring>
+#include <iostream>
+using namespace std;
 
 // === Account =================================================================
 // This class represents one account.
 // =============================================================================
 class Account {
-    friend class Bank;
+private:
+    friend class Bank; // TODO: shouldn't be allowd to directly set variables
 
     static const int MAX_NAME_SIZE = 100;
 
     int id;
-    char user_name[MAX_NAME_SIZE]; // account holder's name
+    char name[MAX_NAME_SIZE]; // account holder's name
     float balance;
 
-    // === Account =============================================================
-    // This is the constructor for the Account struct.
-    //
-    // Input: None
-    //
-    // Output: None
-    // =========================================================================
-    // TODO: can we make constructor private?
-    Account() {
-        reset();
+    Account();
+    Account(int id);
+    // ~Account(); // TODO: this due to Bank using new?
+
+    void reset();
+    bool setName(string new_name);
+    bool deposit(float amount);
+    bool withdraw(float amount);
+};
+
+// === Account::Account ========================================================
+// This is the constructor for the Account class.
+//
+// Input: None
+//
+// Output: None
+// =============================================================================
+Account::Account() {
+    reset();
+}
+
+// === Account::Account ========================================================
+// This is the second constructor for the Account class.
+//
+// Input:
+//      id [IN]                 -- the id to give the account
+//
+// Output: None
+// =============================================================================
+Account::Account(int id) {
+    reset();
+    this->id = id;
+}
+
+
+// === Account::reset ==========================================================
+// This function sets the variables to {0, "UNKNOWN", 0.0}.
+//
+// Input: None
+//
+// Output: None
+// =============================================================================
+void Account::reset() {
+    id = 0;
+    strcpy(name, "UNKNOWN");
+    balance = 0.0;
+}
+
+// === Account::setName ========================================================
+// This function sets the name of the account after santiziing it & checking the
+// length.
+//
+// Input:
+//      name [IN]               -- what to set the account name to
+//
+// Output:
+//      true if name was valid & account was updated, otherwise false
+// =============================================================================
+bool Account::setName(string new_name) {
+    // TODO: santize
+    // TODO: check length
+    // TODO: set the name
+    return true;
+}
+
+// === Account::deposit ========================================================
+// This function deposits an amount to an account.
+//
+// Input:
+//      amount [IN]             -- the amount to deposit
+//
+// Output:
+//      true if the deposit was successful, otherwise false
+// =============================================================================
+bool Account::deposit(float amount) {
+    // TODO: check for overflow
+    
+    balance += amount;
+    return true;
+}
+
+// === Account::withdraw =======================================================
+// This function withdraws an amount from an account.
+//
+// Input:
+//      amount [IN]             -- the amount to withdraw
+//
+// Output:
+//      true if the withdrawal was successful, otherwise false
+// =============================================================================
+bool Account::withdraw(float amount) {
+    if (amount == 0.0) {
+        cout << "Cannot withdraw $0.00\n"; // TODO: handling the errors..
+        return false;
     }
 
-    Account(int id) {
-        // TODO: set..
+    if (balance < amount) {
+        cout << "Cannot withdraw more than your balance";
+        return false;
     }
 
-    // === initialize ==========================================================
-    // This function sets the variables to {0, "UNKNOWN", 0.0}.
-    //
-    // Input: None
-    //
-    // Output: None
-    // =========================================================================
-    void reset() {
-        id = 0;
-        strcpy(user_name, "UNKNOWN");
-        balance = 0.0;
-    }
-
-    // TODO: deposit & withdraw
-    // TODO: close account
-    // TODO: setName
-
-}; // end of Account class
+    balance -= amount;
+    return true;
+}
 
 #endif // ACCOUNT_H
-
-/*
-int calculateOffset(int id) {
-    if (id < 10 || id > MAX_RECORDS || id % 10 != 0) {
-        cout << "Invalid id\n"; // TODO: exit?
-        return -1;
-    }
-    else {
-        return (id/10 - 1) * sizeof(Account);
-    }
-}
-
-void withdraw() {
-    // TODO: the display..
-    // display record before change and prompt for the amount to be added/sub
-    cout << "This is your account:\n"
-        << account.id << " " << account.name
-        << " " << account.balance << endl;
-
-    if (!get(int amount, 0, "How much would you like to withdraw? ")) { // TODO: this allowed?
-        cout << "Error with input\n"; // TODO: what to display?
-    }
-    else if (account.balance < amount) {
-        // TODO can't withdraw that amount
-    }
-    else {
-        account.balance -= amount;
-        cout << "This is your new balance: " << setprecision(2) << fixed 
-            << account.balance << endl;
-
-        updateFile(account);
-    }
-}
-
-void closeAccount() {
-    char confirm;
-
-    cout << "This is your account you are about to close:\n" // display record
-        << account.id << " " << account.name << " "
-        << setprecision(2) << fixed << account.balance << endl
-        << "Are you sure you want to close this account (y/n)? "; // confirm
-
-    if (!Get(confirm))
-        cout << "Error with input\n";
-
-    else if (confirm == 'y') {
-        account.reset(); // replace record with dummy record
-        ra_file.seekp(byte_offset, ios::beg);
-        ra_file.write((char*)&account, sizeof(account));
-    }
-
-    ra_file.close();
-    return;
-}
-
-bool openAccount() {
-    // TODO: errors?
-    if (!account.setName()) {
-        return NULL;
-    }
-    if (!account.deposit()) {
-        return NULL;
-    }
-
-    // TODO: display id to user
-}
-*/
