@@ -11,11 +11,9 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <bitset>
 #include <math.h>
 #include <memory>
-#include "Utilities.h"
 //#include "Cipher.h" // TODO
 using namespace std;
 
