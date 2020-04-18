@@ -11,14 +11,15 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 // === Account =================================================================
 // This class represents one account.
 // =============================================================================
 class Account {
-private:
-    friend class Bank; // TODO: shouldn't be allowd to directly set variables
+public: // TODO: not public
+    //friend class Bank; // TODO: shouldn't be allowd to directly set variables
 
     static const int MAX_NAME_SIZE = 100;
 
@@ -85,8 +86,12 @@ void Account::reset() {
 // =============================================================================
 bool Account::setName(string new_name) {
     // TODO: santize
-    // TODO: check length
-    // TODO: set the name
+    if (new_name.length() > MAX_NAME_SIZE) {
+        cout << "Name too long\n";
+        return false;
+    }
+
+    strcpy(name, new_name.c_str());
     return true;
 }
 
@@ -99,9 +104,18 @@ bool Account::setName(string new_name) {
 // Output:
 //      true if the deposit was successful, otherwise false
 // =============================================================================
-bool Account::deposit(float amount) {
-    // TODO: check for overflow
-    
+bool Account::deposit(float amount) { // TODO: change to double
+    if (amount <= 0.0) {
+        cout << "Cannot deposit $0.00 or less\n";
+        return false;
+    }
+    if (balance + amount > numeric_limits<float>::max()) {
+        cout << "Too much money! Can only deposit $" << setprecision(2) << fixed
+            << numeric_limits<float>::max() - balance
+            << " more. Please open another account.\n";
+        return false;
+    }
+
     balance += amount;
     return true;
 }
@@ -116,8 +130,8 @@ bool Account::deposit(float amount) {
 //      true if the withdrawal was successful, otherwise false
 // =============================================================================
 bool Account::withdraw(float amount) {
-    if (amount == 0.0) {
-        cout << "Cannot withdraw $0.00\n"; // TODO: handling the errors..
+    if (amount <= 0.0) {
+        cout << "Cannot withdraw $0.00 or less\n";
         return false;
     }
 
