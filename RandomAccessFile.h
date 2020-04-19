@@ -102,7 +102,7 @@ RandomAccessFile::RandomAccessFile(string file_name,
 
     // initialize the raf with dummy records
     for (int i = 0; i < MAX_RECORDS; i++) {
-        file.write((char*)dummy_record.get(), sizeof(*dummy_record)); // TODO: may not work
+        file.write((char*)(this->dummy_record).get(), sizeof(*(this->dummy_record))); // TODO: may not work
     }
     file.close();
 }
