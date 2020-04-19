@@ -190,7 +190,7 @@ int RandomAccessFile<T>::getNextAvailableId() {
 template<class T>
 void RandomAccessFile<T>::updateFile(int id, T* record,
     bool update_available_ids /*= false*/) {
-    file.open(file_name, ios::out | ios::binary);
+    file.open(file_name, ios::out | ios::in | ios::binary);
 
     if (file.fail()) {
         cout << "Openning file failed\n";
@@ -305,7 +305,7 @@ bool RandomAccessFile<T>::getRecord(int id, T* record) {
 
     //unique_ptr<T> record(new T());
     file.open(file_name, ios::in | ios::binary);
-    file.seekp(byte_offset, ios::beg);
+    file.seekg(byte_offset, ios::beg);
     file.read((char*)record, sizeof(*record));
     file.close();
 
