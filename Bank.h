@@ -27,7 +27,8 @@ using namespace std;
 // =============================================================================
 class Bank {
 private:
-    RandomAccessFile<Account> raf;
+    //static Account dummy_record(); // TODO: static?
+    RandomAccessFile raf;
 
 public:
     Bank(string ra_file_name);
@@ -49,7 +50,8 @@ public:
 //
 // No Output.
 // =============================================================================
-Bank::Bank(string ra_file_name) : raf(ra_file_name, Account()) { }
+Bank::Bank(string ra_file_name) : raf(ra_file_name, 
+    unique_ptr<RandomAccessFile::RandomAccessFileRecord>(new Account())) { }
 
 // ==== Bank::login ============================================================
 // This function logs a user into the bank by attempting to locate the user's
@@ -67,7 +69,7 @@ unique_ptr<Account> Bank::login() {
         cout << "Failed to get id\n";
         return nullptr;
     }
-    Account login = { id };
+    Account login(id);
 
     string name;
     if (!get(name, "Enter your name: ")) {
@@ -78,13 +80,12 @@ unique_ptr<Account> Bank::login() {
         return nullptr;
     }
 
-    unique_ptr<Account> account = raf.getRecord(id);
-    if (account == nullptr) {
-        return account;
+    unique_ptr<Account> account(new Account());
+    if (!raf.getRecord(id, account.get())) {
+        cout << "Invalid login\n";
+        return nullptr;
     }
 
-    cout << strlen(login.name) << endl << strlen(account->name) << endl;
-    cout << login.name << endl << account->name << endl;
     if (strcmp(login.name, account->name) != 0) {
         cout << "Invalid login\n";
         return nullptr;
@@ -103,11 +104,16 @@ unique_ptr<Account> Bank::login() {
 //      pointer to the account that was created, otherwise nullptr
 // =============================================================================
 unique_ptr<Account> Bank::createAccount() {
-    unique_ptr<Account> account(new Account());
+    int id;
+    if (id = raf.getNextAvailableId() == -1) {
+        // TODO: display msg here instead of from raf
+        return nullptr;
+    }
+    unique_ptr<Account> account(new Account(id));
 
     string name; // TODO: same as login above
     if (!get(name, "Enter your name: ")) {
-        cout << "Failed to get name";
+        cout << "Failed to get name\n";
         return nullptr;
     }
     if (!account->setName(name)){
@@ -116,14 +122,15 @@ unique_ptr<Account> Bank::createAccount() {
 
     float initial_balance = 0.0;
     if (!get(initial_balance, "Enter opening deposit amount: ")) {
-        // TODO; failed input error
+        cout << "Failed to get deposit amount\n";
         return nullptr;
     }
     account->deposit(initial_balance);
 
-    int id = raf.createRecord(*account);
-    // TODO: shouldn't set id here
-    account->id = id;
+    if (!raf.createRecord(account.get())) {
+        cout << "Failed to create account\n";
+        return nullptr;
+    }
     
     cout << "Your id is: " << account->id << endl;
     displayBalance(*account);
@@ -152,11 +159,11 @@ bool Bank::closeAccount(Account &account) {
 
     bool closed = false;
     if (confirm == 'y') {
-        closed = raf.deleteRecord(account.id, account);
-        account.reset();
+        closed = raf.deleteRecord(&account);
     }
 
     if (closed) {
+        account.reset();
         return true;
     }
 
@@ -194,7 +201,7 @@ void Bank::withdraw(Account &account) {
     }
 
     if (account.withdraw(amount)) {
-        raf.updateRecord(account.id, account);
+        raf.updateRecord(&account);
         displayBalance(account);
     }
 }
@@ -216,7 +223,7 @@ void Bank::deposit(Account &account) {
     }
 
     if (account.deposit(amount)) {
-        raf.updateRecord(account.id, account);
+        raf.updateRecord(&account);
         displayBalance(account);
     }
 }
