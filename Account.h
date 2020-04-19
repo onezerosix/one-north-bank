@@ -20,7 +20,7 @@ using namespace std;
 // === Account =================================================================
 // This class represents one account.
 // =============================================================================
-class Account : RandomAccessFile::RandomAccessFileRecord {
+class Account : public RandomAccessFile::RandomAccessFileRecord {
 private:
     friend class Bank; // TODO: shouldn't be allowd to directly set variables
 
@@ -34,10 +34,12 @@ private:
     Account(int id);
 
     void reset();
-    int getId();
     bool setName(string new_name);
     bool deposit(float amount);
     bool withdraw(float amount);
+
+public:
+    int getId();
 };
 
 // === Account::Account ========================================================
