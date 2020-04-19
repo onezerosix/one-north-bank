@@ -20,7 +20,7 @@ using namespace std;
 // === Account =================================================================
 // This class represents one account.
 // =============================================================================
-class Account : public RandomAccessFile::RandomAccessFileRecord {
+class Account : public RandomAccessFileRecord {
 private:
     friend class Bank; // TODO: shouldn't be allowd to directly set variables
 

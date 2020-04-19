@@ -28,7 +28,7 @@ using namespace std;
 class Bank {
 private:
     //static Account dummy_record(); // TODO: static?
-    RandomAccessFile raf;
+    RandomAccessFile<Account> raf;
 
 public:
     Bank(string ra_file_name);
@@ -51,7 +51,7 @@ public:
 // No Output.
 // =============================================================================
 Bank::Bank(string ra_file_name) : raf(ra_file_name, 
-    unique_ptr<RandomAccessFile::RandomAccessFileRecord>(new Account())) { }
+    unique_ptr<Account>(new Account())) { }
 
 // ==== Bank::login ============================================================
 // This function logs a user into the bank by attempting to locate the user's
