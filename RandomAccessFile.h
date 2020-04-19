@@ -156,7 +156,6 @@ int RandomAccessFile::getNextAvailableId() {
     int id;
     for (id = 0; id < MAX_RECORDS; id++) {
         if (available_ids[id]) {
-            available_ids.set(id, false);
             break;
         }
     }
