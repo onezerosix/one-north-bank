@@ -17,47 +17,70 @@
 //#include "Cipher.h" // TODO
 using namespace std;
 
-// === RandomAccessFile ======================================================
+// === RandomAccessFile ========================================================
 // This class represents the random access file.
 // =============================================================================
-template <class T>
 class RandomAccessFile {
+public:
+    class RandomAccessFileRecord;
+
+    RandomAccessFile(string file_name,
+        unique_ptr<RandomAccessFileRecord> dummy_record);
+
+    int getNextAvailableId();
+    bool createRecord(RandomAccessFileRecord* record);
+    bool deleteRecord(RandomAccessFileRecord* record);
+    bool getRecord(int id, RandomAccessFileRecord* record);
+    //void RandomAccessFile<T>::getRecord(int id, unique_ptr<T> &record) {
+    void updateRecord(RandomAccessFileRecord* record);
 private:
     static const int MAX_RECORDS = 100; // TODO: move to be param of contructor?
     bitset<MAX_RECORDS> available_ids;
-    T dummy_record;
+    unique_ptr<RandomAccessFileRecord> dummy_record;
 
     string file_name;
     fstream file;
 
-    int reserveNextAvailableId();
+    bool reserveId(int id);
     void releaseId(int id);
-    void updateFile(int id, T record, bool update_available_ids = false);
+    void updateFile(int id, RandomAccessFileRecord* record,
+        bool update_available_ids = false);
     int calculateOffset(int id, bool include_available_ids = true);
-
-public:
-    RandomAccessFile(string file_name, T dummy_record);
-
-    int createRecord(T record);
-    bool deleteRecord(int id, T record);
-    unique_ptr<T> getRecord(int id);
-    void updateRecord(int id, T record);
 };
 
-// === RandomAccessFile::RandomAccessFile ==================================
+// === RandomAccessFile:RandomAccessFileRecord =================================
+// This class is the base for records in the random access file.
+// =============================================================================
+class RandomAccessFile::RandomAccessFileRecord {
+public:
+    // === getId ===============================================================
+    // This function should be overridden in derived classes. It gets the id of
+    // the record.
+    //
+    // Input: None
+    //
+    // Output:
+    //      int representing the id the of the record
+    // =========================================================================
+    virtual int getId() { return -1; }
+};
+
+// === RandomAccessFile::RandomAccessFile ======================================
 // This is the constructor for the RandomAccessFile class. It creates and
 // initializes the raf with n = MAX_RECORDS dummy records if needed or loads
 // the existing raf.
 //
 // Input:
 //      file_name [IN]                  -- name of the ra file
+//      dummy_record [IN]               -- the dummy record to be given to the
+//                                          RAF class
 //
 // No Output.
 // =============================================================================
-template<class T>
-RandomAccessFile<T>::RandomAccessFile(string file_name, T dummy_record) {
+RandomAccessFile::RandomAccessFile(string file_name, 
+    unique_ptr<RandomAccessFileRecord> dummy_record) {
     this->file_name = file_name;
-    this->dummy_record = dummy_record;
+    this->dummy_record = move(dummy_record);
 
     if (fstream(file_name)) { // file already exists
         // TODO: not validating the input here
@@ -79,22 +102,52 @@ RandomAccessFile<T>::RandomAccessFile(string file_name, T dummy_record) {
 
     // initialize the raf with dummy records
     for (int i = 0; i < MAX_RECORDS; i++) {
-        file.write((char*)&dummy_record, sizeof(dummy_record));
+        file.write((char*)dummy_record.get(), sizeof(*dummy_record)); // TODO: may not work
     }
     file.close();
 }
 
-// ==== RandomAccessFile::reserveNextAvailableId =============================
-// This function gets the next available id & sets it to unavailable.
+// ==== RandomAccessFile::reserveId ============================================
+// This function sets an id to unavailable.
+//
+// Input:
+//      id [IN]                         -- id to be reserved
+//
+// Output:
+//      true if id was able to be reserved, otherwise false
+// =============================================================================
+bool RandomAccessFile::reserveId(int id) {
+    id = id/10 -1;
+    if (!available_ids[id]) {
+        return false;
+    }
+
+    available_ids.set(id, false);
+    return true;
+}
+
+// ==== RandomAccessFile::releaseId ============================================
+// This function sets the id of the record that is being deleted to available so
+// it can be used for another record.
+//
+// Input:
+//      id [IN]                         -- the id that needs to be released
+//
+// Output: None
+// =============================================================================
+void RandomAccessFile::releaseId(int id) {
+    available_ids.set(id/10 - 1, true);
+}
+
+// ==== RandomAccessFile::getNextAvailableId ===================================
+// This function gets the next available id.
 //
 // Input: None
 //
 // Output:
-//      int representing the id that was just reserved if one was available,
-//      otherwise, -1
+//      int representing the next id if one was available, otherwise, -1
 // =============================================================================
-template <class T>
-int RandomAccessFile<T>::reserveNextAvailableId() {
+int RandomAccessFile::getNextAvailableId() {
     if (available_ids.none()) {
         cout << "No available ids\n";
         return -1;
@@ -111,28 +164,14 @@ int RandomAccessFile<T>::reserveNextAvailableId() {
     return (id + 1) * 10;
 }
 
-// ==== RandomAccessFile::releaseId ==========================================
-// This function sets the id of the record that is being deleted to available so
-// it can be used for another record.
-//
-// Input:
-//      id [IN]                -- the id that needs to be released
-//
-// Output: None
-// =============================================================================
-template <class T>
-void RandomAccessFile<T>::releaseId(int id) {
-    available_ids.set(id/10 - 1, true);
-}
-
-// ==== RandomAccessFile::updateFile =========================================
+// ==== RandomAccessFile::updateFile ===========================================
 // This function updates the random access file. It's essentially like updating
 // a record in the database. It should be the final step of a transaction.
 //
 // Input:
-//      id [IN]                         -- the id of the record being updated
-//      record [IN]                     -- the record that had a transaction 
-//                                          performed
+//      id [IN]                         -- id of the record to be updated
+//      record [IN]                     -- pointer to the record that had a 
+//                                          transaction  performed
 //      update_available_ids [OPT IN]   -- optional: boolean indicating whether 
 //                                          there a the set of available_ids
 //                                          needs to be updated in the RAF.
@@ -140,8 +179,7 @@ void RandomAccessFile<T>::releaseId(int id) {
 //
 // Output: None
 // =============================================================================
-template <class T>
-void RandomAccessFile<T>::updateFile(int id, T record,
+void RandomAccessFile::updateFile(int id, RandomAccessFileRecord* record,
     bool update_available_ids /*= false*/) {
     file.open(file_name, ios::out | ios::binary);
 
@@ -160,11 +198,11 @@ void RandomAccessFile<T>::updateFile(int id, T record,
     int byte_offset = calculateOffset(id, false);
     
     file.seekp(byte_offset, ios::cur);
-    file.write((char*)&record, sizeof(record));
+    file.write((char*)record, sizeof(*record));
     file.close();
 }
 
-// === RandomAccessFile::calculateOffset =====================================
+// === RandomAccessFile::calculateOffset =======================================
 // This function calculates where a record should be in the random access file.
 //
 // Input:
@@ -177,101 +215,101 @@ void RandomAccessFile<T>::updateFile(int id, T record,
 // Output:
 //      int representing the offset of the record in bytes
 // =============================================================================
-template <class T>
-int RandomAccessFile<T>::calculateOffset(int id,
+int RandomAccessFile::calculateOffset(int id,
     bool include_available_ids /*= true*/) {
-    // TODO: validate id?
-    int offset = (id/10 - 1) * sizeof(T);
+
+    int offset = (id/10 - 1) * sizeof(*dummy_record);
     if (include_available_ids) {
         offset += sizeof(available_ids);
     }
     return offset;
 }
 
-// ==== RandomAccessFile::createRecord =======================================
+// ==== RandomAccessFile::createRecord =========================================
 // This function adds a new record to the RAF if there is room for one.
 //
 // Input:
-//      record [IN]             -- the record to be added
+//      record [IN]                     -- pointer to the record to be added
 //
 // Output:
-//      The id of the new record if there was room for one, otherwise -1.
+//      true if the record was added, otherwise false
 // =============================================================================
-template <class T>
-int RandomAccessFile<T>::createRecord(T record) {
-    int id = reserveNextAvailableId();
+bool RandomAccessFile::createRecord(RandomAccessFileRecord* record) {
+    // TODO: validate record->getId
+    int id = record->getId();
 
-    if (id != -1) {
-        updateFile(id, record, true);
+    if (!reserveId(id)) {
+        return false; // TODO: print msg?
     }
 
-    return id;
+    updateFile(id, record, true);
+
+    return true;
 }
 
-// === RandomAccessFile::deleteRecord ========================================
+// === RandomAccessFile::deleteRecord ==========================================
 // This functions deletes a record from the raf if it's up to date.
 //
 // Input:
-//      id [IN]                 -- the id of the record being deleted
 //      record [IN]             -- the record that is being deleted
 //
 // Output:
 //      true if succeeded in deleting the record, otherwise false
 // =============================================================================
-template <class T>
-bool RandomAccessFile<T>::deleteRecord(int id, T record) { // TODO: password?
-    // TODO: validate id?
-    unique_ptr<T> record_in_raf = getRecord(id);
+bool RandomAccessFile::deleteRecord(RandomAccessFileRecord* record) { // TODO: password?
+    // TODO: validate record->getId
+    int id = record->getId();
 
-    // TODO: this
-    // if (record_in_raf != record) {
+    // TODO: this..later
+    // if (getRecord(id) != record) {
     //     return false;
     // }
 
     releaseId(id);
-    updateFile(id, dummy_record, true);
+    updateFile(id, dummy_record.get(), true);
 
     return true;
 }
 
-// ==== RandomAccessFile::getRecord ==========================================
+// ==== RandomAccessFile::getRecord ============================================
 // This function attempts to get a record from the RAF.
 //
-// Input: None
+// Input:
+//      id [IN]                         -- id of the record to get
+//      record [OUT]                    -- pointer to where the record should
+//                                          get written out to
 //
 // Output:
-//      pointer to record if it was able to be located, otherwise nullptr
+//      true if able to get the record, otherwise false
 // =============================================================================
-template <class T>
-unique_ptr<T> RandomAccessFile<T>::getRecord(int id) {
+bool RandomAccessFile::getRecord(int id, RandomAccessFileRecord* record) {
     if (id < 10 || id > MAX_RECORDS * 10 || id % 10 != 0) {
         cout << "Invalid id\n";
-        return nullptr;
+        return false;
     } // TODO: move this validation
 
     int byte_offset = calculateOffset(id);
 
-    unique_ptr<T> record(new T());
+    //unique_ptr<T> record(new T());
     file.open(file_name, ios::in | ios::binary);
     file.seekp(byte_offset, ios::beg);
-    file.read((char*)record.get(), sizeof(T));
+    file.read((char*)record, sizeof(*record));
     file.close();
 
-    return record;
+    return true;
 }
 
-// ==== RandomAccessFile::updateRecord =======================================
+// ==== RandomAccessFile::updateRecord =========================================
 // This function updates a record.
 //
 // Input:
-//      id [IN]                         -- the id of the record being updated
 //      record [IN]                     -- the record that is being updated
 //
 // Output: None
 // =============================================================================
-template <class T>
-void RandomAccessFile<T>::updateRecord(int id, T record) {
+void RandomAccessFile::updateRecord(RandomAccessFileRecord* record) {
     // TODO: validate id?
+    int id = record->getId();
     updateFile(id, record);
 }
 
