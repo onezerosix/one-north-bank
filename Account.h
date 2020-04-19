@@ -12,14 +12,17 @@
 #include <cstring>
 #include <iostream>
 #include <iomanip>
+#include <limits>
+#include "RandomAccessFile.h"
 using namespace std;
+//using RandomAccessFile::RandomAccessFileRecord; // TODO: make RandomAccessFile a namespace
 
 // === Account =================================================================
 // This class represents one account.
 // =============================================================================
-class Account {
-public: // TODO: not public
-    //friend class Bank; // TODO: shouldn't be allowd to directly set variables
+class Account : RandomAccessFile::RandomAccessFileRecord {
+private:
+    friend class Bank; // TODO: shouldn't be allowd to directly set variables
 
     static const int MAX_NAME_SIZE = 100;
 
@@ -31,6 +34,7 @@ public: // TODO: not public
     Account(int id);
 
     void reset();
+    int getId();
     bool setName(string new_name);
     bool deposit(float amount);
     bool withdraw(float amount);
@@ -73,6 +77,16 @@ void Account::reset() {
     strcpy(name, "UNKNOWN");
     balance = 0.0;
 }
+
+// === Account::getId ==========================================================
+// This function get the id of the account.
+//
+// Input: None
+//
+// Output:
+//      the id of the account
+// =============================================================================
+int Account::getId() { return this->id; }
 
 // === Account::setName ========================================================
 // This function sets the name of the account after santiziing it & checking the
