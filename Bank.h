@@ -104,8 +104,8 @@ unique_ptr<Account> Bank::login() {
 //      pointer to the account that was created, otherwise nullptr
 // =============================================================================
 unique_ptr<Account> Bank::createAccount() {
-    int id;
-    if (id = raf.getNextAvailableId() == -1) {
+    int id = raf.getNextAvailableId();
+    if (id == -1) {
         // TODO: display msg here instead of from raf
         return nullptr;
     }
