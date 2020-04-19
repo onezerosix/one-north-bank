@@ -284,7 +284,7 @@ bool RandomAccessFile::deleteRecord(RandomAccessFileRecord* record) { // TODO: p
 // =============================================================================
 bool RandomAccessFile::getRecord(int id, RandomAccessFileRecord* record) {
     if (id < 10 || id > MAX_RECORDS * 10 || id % 10 != 0) {
-        cout << "Invalid id\n";
+        //cout << "Invalid id\n";
         return false;
     } // TODO: move this validation
 
