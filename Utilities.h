@@ -12,7 +12,6 @@
 #include <iostream>
 #include <limits>
 #include <string>
-using namespace std;
 
 // function prototypes
 template <class T> bool get(T &input, string prompt);
@@ -31,6 +30,8 @@ void printDateAndTime();
 //      true if no errors occured, otherwise false
 // =============================================================================
 template <class T> bool get(T &input, string prompt_msg) {
+    using namespace std;
+
     if (!prompt_msg.empty()) {
         cout << prompt_msg;
     }
@@ -63,6 +64,8 @@ template <class T> bool get(T &input, string prompt_msg) {
 //      true if no errors occured, otherwise false
 // =============================================================================
 template <class T> bool get(T &input, T default_val, string prompt_msg) {
+    using namespace std;
+
     bool successful = get(input, prompt_msg);
     if (!successful) {
         input = default_val;
@@ -79,6 +82,8 @@ template <class T> bool get(T &input, T default_val, string prompt_msg) {
 // Output: None
 // =============================================================================
 void printDateAndTime() {
+    using namespace std;
+
     // retrieve date & time
     time_t rawtime;
     time(&rawtime);

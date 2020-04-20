@@ -15,7 +15,7 @@
 #include <math.h>
 #include <memory>
 //#include "Cipher.h" // TODO
-using namespace std;
+using namespace std; // TODO: remove since this is a header
 
 
 // === RandomAccessFileRecord =================================

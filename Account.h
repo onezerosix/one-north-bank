@@ -14,7 +14,7 @@
 #include <iomanip>
 #include <limits>
 #include "RandomAccessFile.h"
-using namespace std;
+using namespace std; // TODO: remove since this is a header
 //using RandomAccessFile::RandomAccessFileRecord; // TODO: make RandomAccessFile a namespace
 
 // === Account =================================================================

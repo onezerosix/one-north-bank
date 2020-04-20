@@ -20,7 +20,7 @@
 #include "Utilities.h"
 #include "RandomAccessFile.h"
 //#include "Cipher.h" // TODO
-using namespace std;
+using namespace std; // TODO: remove since this file is a header
 
 // === Bank ====================================================================
 // This class represents the bank.
