@@ -34,7 +34,14 @@ public:
     // =========================================================================
     virtual int getId() { return -1; }
 
-    //virtual size_t size() { return 0; }
+    // TODO: these won't work with encryption
+    virtual void write(fstream &file) {
+        file.write((char*)this, sizeof(this));
+    }
+
+    virtual void read(fstream &file) {
+        file.read((char*)this, sizeof(this));
+    }
 };
 
 // === RandomAccessFile ========================================================
@@ -107,7 +114,7 @@ RandomAccessFile<T>::RandomAccessFile(string file_name,
 
     // initialize the raf with dummy records
     for (int i = 0; i < MAX_RECORDS; i++) {
-        file.write((char*)(this->dummy_record).get(), sizeof(*(this->dummy_record))); // TODO: may not work
+        this->dummy_record->write(file);
     }
 
     file.close();
@@ -207,7 +214,7 @@ void RandomAccessFile<T>::updateFile(int id, T* record,
     int byte_offset = calculateOffset(id, false);
     
     file.seekp(byte_offset, ios::cur);
-    file.write((char*)record, sizeof(*record));
+    record->write(file);
     file.close();
 }
 
@@ -306,7 +313,7 @@ bool RandomAccessFile<T>::getRecord(int id, T* record) {
     //unique_ptr<T> record(new T());
     file.open(file_name, ios::in | ios::binary);
     file.seekg(byte_offset, ios::beg);
-    file.read((char*)record, sizeof(*record));
+    record->read(file);
     file.close();
 
     return true;

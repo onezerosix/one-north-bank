@@ -39,7 +39,19 @@ private:
     bool withdraw(float amount);
 
 public:
-    int getId();
+    int getId() override;
+
+    // TODO: make better
+    void write(fstream &file) override {
+        file.write((char*)&id, sizeof(id));
+        file.write((char*)name, sizeof(name));
+        file.write((char*)&balance, sizeof(balance));
+    }
+    void read(fstream &file) override {
+        file.read((char*)&id, sizeof(id));
+        file.read((char*)name, sizeof(name));
+        file.read((char*)&balance, sizeof(balance));
+    }
 };
 
 // === Account::Account ========================================================
