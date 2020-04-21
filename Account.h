@@ -28,7 +28,7 @@ private:
     static const int MAX_NAME_SIZE = 100;
 
     int id;
-    char name[MAX_NAME_SIZE]; // account holder's name
+    char name[MAX_NAME_SIZE]; // account holder's name (null terminated)
     float balance;
 
     Account();
@@ -126,7 +126,8 @@ int Account::getId() { return this->id; }
 bool Account::setName(string new_name) {
     // TODO: santize
     if (new_name.length() + 1 > MAX_NAME_SIZE) {
-        cout << "Name too long\n";
+        cout << "Name is too long by " << MAX_NAME_SIZE - 1 - new_name.length()
+            << " characters\n";
         return false;
     }
 
