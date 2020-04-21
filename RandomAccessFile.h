@@ -32,27 +32,13 @@ public:
     // Output:
     //      int representing the id the of the record
     // =========================================================================
-    virtual int getId() { return -1; } // TODO: throw not implemented
+    virtual int getId() = 0;
 
-    virtual size_t getSize() {
-        return sizeof(this);
-    }
+    virtual size_t getSize() = 0;
 
-    virtual bool serialize(char* str) {
-        if (sizeof(this) != sizeof(str)) {
-            return false;
-        }
-        strcpy(str, (char*)this);
-        return true;
-    }
+    virtual bool serialize(char* str) = 0;
 
-    virtual bool deserialize(char* str) {
-        if (sizeof(this) != sizeof(str)) {
-            return false;
-        }
-        strcpy((char*)this, str);
-        return true;
-    }
+    virtual bool deserialize(char* str) = 0;
 };
 
 // === RandomAccessFile ========================================================
