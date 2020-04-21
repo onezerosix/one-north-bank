@@ -45,7 +45,7 @@ public:
     size_t getSize() override { return sizeof(id) + sizeof(name) + sizeof(balance); }
 
     // TODO: make better
-    bool serialize(char* str) override {
+    bool serialize(char* str) override { // TODO: stringstream
         if (sizeof(str) != getSize()) {
             return false;
         }
