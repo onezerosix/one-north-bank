@@ -125,7 +125,7 @@ int Account::getId() { return this->id; }
 // =============================================================================
 bool Account::setName(string new_name) {
     // TODO: santize
-    if (new_name.length() > MAX_NAME_SIZE) {
+    if (new_name.length() + 1 > MAX_NAME_SIZE) {
         cout << "Name too long\n";
         return false;
     }
