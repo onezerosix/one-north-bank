@@ -60,7 +60,7 @@ public:
         }
         from_chars(str, str + sizeof(id), id);
         strncat(name, str + sizeof(id), sizeof(name));
-        //from_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
+        from_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
         return true;
     }
 };
