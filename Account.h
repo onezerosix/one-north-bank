@@ -13,6 +13,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
+#include <charconv>
 #include "RandomAccessFile.h"
 using namespace std; // TODO: remove since this is a header
 //using RandomAccessFile::RandomAccessFileRecord; // TODO: make RandomAccessFile a namespace
@@ -41,16 +42,26 @@ private:
 public:
     int getId() override;
 
+    size_t getSize() override { return sizeof(id) + sizeof(name) + sizeof(balance); }
+
     // TODO: make better
-    void write(fstream &file) override {
-        file.write((char*)&id, sizeof(id));
-        file.write((char*)name, sizeof(name));
-        file.write((char*)&balance, sizeof(balance));
+    bool serialize(char* str) override {
+        if (sizeof(str) != getSize()) {
+            return false;
+        }
+        to_chars(str, str + sizeof(id), id);
+        strncat(str + sizeof(id), name, sizeof(name));
+        to_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
+        return true;
     }
-    void read(fstream &file) override {
-        file.read((char*)&id, sizeof(id));
-        file.read((char*)name, sizeof(name));
-        file.read((char*)&balance, sizeof(balance));
+    bool deserialize(char* str) override {
+        if (sizeof(str) != getSize()) {
+            return false;
+        }
+        from_chars(str, str + sizeof(id), id);
+        strncat(name, str + sizeof(id), sizeof(name));
+        //from_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
+        return true;
     }
 };
 

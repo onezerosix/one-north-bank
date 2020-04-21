@@ -32,15 +32,26 @@ public:
     // Output:
     //      int representing the id the of the record
     // =========================================================================
-    virtual int getId() { return -1; }
+    virtual int getId() { return -1; } // TODO: throw not implemented
 
-    // TODO: these won't work with encryption
-    virtual void write(fstream &file) {
-        file.write((char*)this, sizeof(this));
+    virtual size_t getSize() {
+        return sizeof(this);
     }
 
-    virtual void read(fstream &file) {
-        file.read((char*)this, sizeof(this));
+    virtual bool serialize(char* str) {
+        if (sizeof(this) != sizeof(str)) {
+            return false;
+        }
+        strcpy(str, (char*)this);
+        return true;
+    }
+
+    virtual bool deserialize(char* str) {
+        if (sizeof(this) != sizeof(str)) {
+            return false;
+        }
+        strcpy((char*)this, str);
+        return true;
     }
 };
 
@@ -53,6 +64,7 @@ private:
     static const int MAX_RECORDS = 100; // TODO: move to be param of contructor?
     bitset<MAX_RECORDS> available_ids;
     unique_ptr<T> dummy_record;
+    size_t record_size;
 
     string file_name;
     fstream file;
@@ -93,6 +105,7 @@ RandomAccessFile<T>::RandomAccessFile(string file_name,
     unique_ptr<T> dummy_record) {
     this->file_name = file_name;
     this->dummy_record = move(dummy_record);
+    record_size = this->dummy_record->getSize();
 
     if (fstream(file_name)) { // file already exists
         // TODO: not validating the input here
@@ -113,8 +126,10 @@ RandomAccessFile<T>::RandomAccessFile(string file_name,
     file.write((char*)&available_ids, sizeof(available_ids));
 
     // initialize the raf with dummy records
-    for (int i = 0; i < MAX_RECORDS; i++) {
-        this->dummy_record->write(file);
+    char record[record_size];
+    this->dummy_record->serialize(record); // TODO: bool return
+    for (int i = 0; i < MAX_RECORDS; i++) { // TODO: add extra for validation
+        file.write(record, record_size);
     }
 
     file.close();
@@ -212,9 +227,11 @@ void RandomAccessFile<T>::updateFile(int id, T* record,
     }
 
     int byte_offset = calculateOffset(id, false);
-    
     file.seekp(byte_offset, ios::cur);
-    record->write(file);
+
+    char serialized_record[record_size];
+    record->serialize(serialized_record); // TODO: boolean return
+    file.write((char*)serialized_record, record_size);
     file.close();
 }
 
@@ -235,7 +252,7 @@ template<class T>
 int RandomAccessFile<T>::calculateOffset(int id,
     bool include_available_ids /*= true*/) {
 
-    int offset = (id/10 - 1) * sizeof(*dummy_record);
+    int offset = (id/10 - 1) * record_size;
     if (include_available_ids) {
         offset += sizeof(available_ids);
     }
@@ -313,9 +330,12 @@ bool RandomAccessFile<T>::getRecord(int id, T* record) {
     //unique_ptr<T> record(new T());
     file.open(file_name, ios::in | ios::binary);
     file.seekg(byte_offset, ios::beg);
-    record->read(file);
+
+    char serialized_record[record_size];
+    file.read(serialized_record, record_size);
     file.close();
 
+    record->deserialize(serialized_record); // TODO: bool return..
     return true;
 }
 
