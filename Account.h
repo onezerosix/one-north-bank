@@ -13,7 +13,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
-#include <charconv>
+#include <sstream>
 #include "RandomAccessFile.h"
 using namespace std; // TODO: remove since this is a header
 //using RandomAccessFile::RandomAccessFileRecord; // TODO: make RandomAccessFile a namespace
@@ -45,22 +45,39 @@ public:
     size_t getSize() override { return sizeof(id) + sizeof(name) + sizeof(balance); }
 
     // TODO: make better
-    bool serialize(char* str) override { // TODO: stringstream
-        if (sizeof(str) != getSize()) {
-            return false;
-        }
-        to_chars(str, str + sizeof(id), id);
-        strncat(str + sizeof(id), name, sizeof(name));
-        to_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
+    bool serialize(char* str) override { // TODO: change because can't tell buffer size
+        // if (sizeof(str) != getSize()) {
+        //     cout << "serialize str not long enough\n";
+        //     return false;
+        // }
+
+        stringstream ss;
+        ss.write((char*)&id, sizeof(id));
+        ss.write((char*)name, sizeof(name));
+        ss.write((char*)&balance, sizeof(balance));
+        ss.read(str, getSize());
+
+        // strncpy(str, to_string(id).c_str(), sizeof(id) + 1);
+        // strncat(str + sizeof(id), name, sizeof(name));
+        // to_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
         return true;
     }
     bool deserialize(char* str) override {
-        if (sizeof(str) != getSize()) {
-            return false;
-        }
-        from_chars(str, str + sizeof(id), id);
-        strncat(name, str + sizeof(id), sizeof(name));
-        from_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
+        // if (sizeof(str) != getSize()) {
+        //     cout << "deserialize str not long enough\n";
+        //     return false;
+        // }
+
+        stringstream ss;
+        ss.write((char*)str, getSize());
+        ss.read((char*)&id, sizeof(id));
+        ss.read((char*)name, sizeof(name));
+        ss.read((char*)&balance, sizeof(balance));
+
+        // stoi(string(str))
+        // from_chars(str, str + sizeof(id), id);
+        // strncat(name, str + sizeof(id), sizeof(name));
+        // from_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
         return true;
     }
 };
