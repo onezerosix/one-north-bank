@@ -166,14 +166,14 @@ bool Account::deposit(float amount) { // TODO: change to double
         cout << "Cannot deposit $0.00 or less\n";
         return false;
     }
-    if (balance + amount > numeric_limits<float>::max()) {
+    if (amount > numeric_limits<float>::max() - balance) {
         cout << "Too much money! Can only deposit $" << setprecision(2) << fixed
             << numeric_limits<float>::max() - balance
             << " more. Please open another account.\n";
         return false;
     }
 
-    balance += amount;
+    balance += amount; // TODO: rounding to max when gets too big
     return true;
 }
 
