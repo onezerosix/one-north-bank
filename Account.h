@@ -45,39 +45,39 @@ public:
     size_t getSize() override { return sizeof(id) + sizeof(name) + sizeof(balance); }
 
     // TODO: make better
-    bool serialize(char* str) override { // TODO: change because can't tell buffer size
-        // if (sizeof(str) != getSize()) {
-        //     cout << "serialize str not long enough\n";
-        //     return false;
-        // }
+    bool serialize(stringstream &ss) override {
+        if (!ss) {
+            cout << "serialize: buffer error\n";
+            return false;
+        }
 
-        stringstream ss;
+        if (ss.tellp() != 0) {
+            cout << "serialize: buffer status error\n";
+        }
+
         ss.write((char*)&id, sizeof(id));
         ss.write((char*)name, sizeof(name));
         ss.write((char*)&balance, sizeof(balance));
-        ss.read(str, getSize());
+        //ss.read(str, getSize());
 
-        // strncpy(str, to_string(id).c_str(), sizeof(id) + 1);
-        // strncat(str + sizeof(id), name, sizeof(name));
-        // to_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
         return true;
     }
-    bool deserialize(char* str) override {
-        // if (sizeof(str) != getSize()) {
-        //     cout << "deserialize str not long enough\n";
-        //     return false;
-        // }
+    bool deserialize(stringstream &ss) override {
+        if (!ss) {
+            cout << "deserialize: buffer error\n";
+            return false;
+        }
 
-        stringstream ss;
-        ss.write((char*)str, getSize());
+        if (ss.tellp() != getSize() || ss.tellg() != 0) {
+            cout << "deserialize: buffer status error\n";
+            return false;
+        }
+
+        //ss.write((char*)str, getSize());
         ss.read((char*)&id, sizeof(id));
         ss.read((char*)name, sizeof(name));
         ss.read((char*)&balance, sizeof(balance));
 
-        // stoi(string(str))
-        // from_chars(str, str + sizeof(id), id);
-        // strncat(name, str + sizeof(id), sizeof(name));
-        // from_chars(str + sizeof(str) - sizeof(balance), str + sizeof(str), balance);
         return true;
     }
 };

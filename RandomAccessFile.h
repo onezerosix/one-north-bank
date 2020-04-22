@@ -16,7 +16,7 @@
 #include <memory>
 //#include "Cipher.h" // TODO
 using namespace std; // TODO: remove since this is a header
-
+// TODO: validating/santizing input
 
 // === RandomAccessFileRecord =================================
 // This class is the base for records in the random access file.
@@ -36,9 +36,9 @@ public:
 
     virtual size_t getSize() = 0;
 
-    virtual bool serialize(char* str) = 0;
+    virtual bool serialize(stringstream &ss) = 0;
 
-    virtual bool deserialize(char* str) = 0;
+    virtual bool deserialize(stringstream &ss) = 0;
 };
 
 // === RandomAccessFile ========================================================
@@ -57,6 +57,7 @@ private:
 
     bool reserveId(int id);
     void releaseId(int id);
+    //void serializeRecord(stringstream ss)
     void updateFile(int id, T* record, bool update_available_ids = false);
     int calculateOffset(int id, bool include_available_ids = true);
 
@@ -112,9 +113,27 @@ RandomAccessFile<T>::RandomAccessFile(string file_name,
     file.write((char*)&available_ids, sizeof(available_ids));
 
     // initialize the raf with dummy records
+    stringstream ss;
+    if (!this->dummy_record->serialize(ss)) {
+        cout << "Error with serializing record\nExiting\n";
+        file.close();
+        exit(-10); // TODO: change to something better?
+    }
+    if (ss.tellp() != record_size) {
+        file.close();
+        cout << "Error serializing records\nExiting\n";
+        exit(-10); // TODO: change to something better?
+    }
+    if (!ss) {
+        file.close(); // TODO: file.close repeatedly...
+        cout << "Error serializing status\nExiting\n";
+        exit(-10); // TODO: change to something better?
+    }
+
     char record[record_size];
-    this->dummy_record->serialize(record); // TODO: bool return
-    for (int i = 0; i < MAX_RECORDS; i++) { // TODO: add extra for validation
+    ss.seekg(0, ios::beg);
+    ss.read(record, record_size);
+    for (int i = 0; i < MAX_RECORDS; i++) {
         file.write(record, record_size);
     }
 
@@ -195,13 +214,13 @@ int RandomAccessFile<T>::getNextAvailableId() {
 //
 // Output: None
 // =============================================================================
-template<class T>
+template<class T> // TODO: bool return?
 void RandomAccessFile<T>::updateFile(int id, T* record,
     bool update_available_ids /*= false*/) {
     file.open(file_name, ios::out | ios::in | ios::binary);
 
     if (file.fail()) {
-        cout << "Openning file failed\n";
+        cout << "Opening file failed\n";
         exit(-10); // TODO: code/msg better than -10?
     }
 
@@ -215,9 +234,27 @@ void RandomAccessFile<T>::updateFile(int id, T* record,
     int byte_offset = calculateOffset(id, false);
     file.seekp(byte_offset, ios::cur);
 
+    stringstream ss; // TODO: same as constructor..
+    if (!record->serialize(ss)) {
+        cout << "Error with serializing record\nExiting\n";
+        file.close();
+        exit(-10); // TODO: change to something better?
+    }
+    if (ss.tellp() != record_size) {
+        file.close();
+        cout << "Error serializing records\nExiting\n";
+        exit(-10); // TODO: change to something better?
+    }
+    if (!ss) {
+        file.close(); // TODO: file.close repeatedly...
+        cout << "Error serializing status\nExiting\n";
+        exit(-10); // TODO: change to something better?
+    }
+
     char serialized_record[record_size];
-    record->serialize(serialized_record); // TODO: boolean return
-    file.write((char*)serialized_record, record_size);
+    ss.seekg(0, ios::beg);
+    ss.read(serialized_record, record_size);
+    file.write(serialized_record, record_size);
     file.close();
 }
 
@@ -321,7 +358,12 @@ bool RandomAccessFile<T>::getRecord(int id, T* record) {
     file.read(serialized_record, record_size);
     file.close();
 
-    record->deserialize(serialized_record); // TODO: bool return..
+    stringstream ss;
+    ss.write(serialized_record, record_size);
+    if (!record->deserialize(ss)) {
+        cout << "Error with deserializing\n";
+        return false;
+    }
     return true;
 }
 
