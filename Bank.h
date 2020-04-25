@@ -26,6 +26,16 @@ using namespace std; // TODO: remove since this file is a header
 // This class represents the bank.
 // =============================================================================
 class Bank {
+public:
+    Bank(string ra_file_name);
+
+    bool login();
+    bool createAccount();
+    bool closeAccount();
+
+    void displayBalance();
+    void adjustBalance(bool is_deposit);
+
 private:
     // === Account =================================================================
     // This class represents one account.
@@ -118,16 +128,6 @@ private:
     RandomAccessFile raf;
     unique_ptr<Bank::Account> current_account; // TODO: validate logged in?
     // TODO: logout function?
-
-public:
-    Bank(string ra_file_name);
-
-    bool login();
-    bool createAccount();
-    bool closeAccount();
-
-    void displayBalance();
-    void adjustBalance(bool is_deposit);
 };
 
 // TODO; docs
