@@ -14,8 +14,8 @@
 #include <string>
 
 // function prototypes
-template <class T> bool get(T &input, string prompt);
-template <class T> bool get(T &input, T default_val, string prompt);
+template <class T> bool get(T &input, std::string prompt);
+template <class T> bool get(T &input, T default_val, std::string prompt);
 void printDateAndTime();
 
 // === get =====================================================================
@@ -29,7 +29,7 @@ void printDateAndTime();
 // Output:
 //      true if no errors occured, otherwise false
 // =============================================================================
-template <class T> bool get(T &input, string prompt_msg) {
+template <class T> bool get(T &input, std::string prompt_msg) {
     using namespace std;
 
     if (!prompt_msg.empty()) {
@@ -63,7 +63,7 @@ template <class T> bool get(T &input, string prompt_msg) {
 // Output:
 //      true if no errors occured, otherwise false
 // =============================================================================
-template <class T> bool get(T &input, T default_val, string prompt_msg) {
+template <class T> bool get(T &input, T default_val, std::string prompt_msg) {
     using namespace std;
 
     bool successful = get(input, prompt_msg);
