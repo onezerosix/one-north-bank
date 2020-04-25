@@ -74,10 +74,10 @@ void promptMenu(Bank &bank) { // TODO: this function
                 bank.displayBalance();
                 break;
             case 2:
-                bank.deposit();
+                bank.adjustBalance(true);
                 break;
             case 3:
-                bank.withdraw();
+                bank.adjustBalance(false);
                 break;
             case 4:
                 bank.closeAccount();

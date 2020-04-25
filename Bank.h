@@ -9,6 +9,7 @@
 #define BANK_H
 
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -16,7 +17,6 @@
 #include <math.h>
 #include <memory>
 #include <limits>
-#include "Account.h"
 #include "Utilities.h"
 #include "RandomAccessFile.h"
 //#include "Cipher.h" // TODO
@@ -39,15 +39,41 @@ private:
         char name[MAX_NAME_SIZE]; // account holder's name (null terminated)
         float balance;
 
-        Account();
-        Account(int id);
+        // === Account::Account ========================================================
+        // This is the constructor for the Account class.
+        //
+        // Input: None
+        //
+        // Output: None
+        // =============================================================================
+        Account() { reset(); }
 
-        void reset();
-        bool setName(string new_name);
-        bool deposit(float amount);
-        bool withdraw(float amount);
+        // === Account::reset ==========================================================
+        // This function sets the variables to {0, "UNKNOWN", 0.0}.
+        //
+        // Input: None
+        //
+        // Output: None
+        // =============================================================================
+        void reset() {
+            id = 0;
+            strcpy(name, "UNKNOWN");
+            balance = 0.0;
+        }
 
-        int getId() override;
+        bool setName();
+        bool deposit(string promptMsg = "How much would you like to deposit? ");
+        bool withdraw();
+
+        // === Account::getId ==========================================================
+        // This function get the id of the account.
+        //
+        // Input: None
+        //
+        // Output:
+        //      the id of the account
+        // =============================================================================
+        int getId() override { return this->id; }
 
         size_t getSize() override { return sizeof(id) + sizeof(name) + sizeof(balance); }
 
@@ -101,58 +127,10 @@ public:
     bool closeAccount();
 
     void displayBalance();
-    void withdraw();
-    void deposit();
+    void adjustBalance(bool is_deposit);
 };
 
-// === Account::Account ========================================================
-// This is the constructor for the Account class.
-//
-// Input: None
-//
-// Output: None
-// =============================================================================
-Bank::Account::Account() {
-    reset();
-}
-
-// === Account::Account ========================================================
-// This is the second constructor for the Account class.
-//
-// Input:
-//      id [IN]                 -- the id to give the account
-//
-// Output: None
-// =============================================================================
-Bank::Account::Account(int id) {
-    reset();
-    this->id = id;
-}
-
-
-// === Account::reset ==========================================================
-// This function sets the variables to {0, "UNKNOWN", 0.0}.
-//
-// Input: None
-//
-// Output: None
-// =============================================================================
-void Bank::Account::reset() {
-    id = 0;
-    strcpy(name, "UNKNOWN");
-    balance = 0.0;
-}
-
-// === Account::getId ==========================================================
-// This function get the id of the account.
-//
-// Input: None
-//
-// Output:
-//      the id of the account
-// =============================================================================
-int Bank::Account::getId() { return this->id; }
-
+// TODO; docs
 // === Account::setName ========================================================
 // This function sets the name of the account after santiziing it & checking the
 // length.
@@ -163,18 +141,25 @@ int Bank::Account::getId() { return this->id; }
 // Output:
 //      true if name was valid & account was updated, otherwise false
 // =============================================================================
-bool Bank::Account::setName(string new_name) {
+bool Bank::Account::setName() {
     // TODO: santize
-    if (new_name.length() + 1 > MAX_NAME_SIZE) {
-        cout << "Name is too long by " << new_name.length() + 1 - MAX_NAME_SIZE
+    string name;
+    if (!get(name, "Enter your name: ")) {
+        cout << "Failed to get name";
+        return false;
+    }
+
+    if (name.length() + 1 > MAX_NAME_SIZE) {
+        cout << "Name is too long by " << name.length() + 1 - MAX_NAME_SIZE
             << " characters\n";
         return false;
     }
 
-    strcpy(name, new_name.c_str());
+    strcpy(this->name, name.c_str());
     return true;
 }
 
+// TODO: change
 // === Account::deposit ========================================================
 // This function deposits an amount to an account.
 //
@@ -184,7 +169,14 @@ bool Bank::Account::setName(string new_name) {
 // Output:
 //      true if the deposit was successful, otherwise false
 // =============================================================================
-bool Bank::Account::deposit(float amount) { // TODO: change to double
+bool Bank::Account::deposit(string promptMsg /*= "How much would you like to deposit? "*/) { // TODO: change to double
+    float amount;
+
+    if (!get(amount, promptMsg)) {
+        cout << "Error with input\n"; // TODO: what to display?
+        return false;
+    }
+
     if (amount <= 0.0) {
         cout << "Cannot deposit $0.00 or less\n";
         return false;
@@ -200,6 +192,7 @@ bool Bank::Account::deposit(float amount) { // TODO: change to double
     return true;
 }
 
+// TODO: update
 // === Account::withdraw =======================================================
 // This function withdraws an amount from an account.
 //
@@ -209,7 +202,14 @@ bool Bank::Account::deposit(float amount) { // TODO: change to double
 // Output:
 //      true if the withdrawal was successful, otherwise false
 // =============================================================================
-bool Bank::Account::withdraw(float amount) {
+bool Bank::Account::withdraw() {
+    float amount;
+
+    if (!get(amount, "How much would you like to withdraw? ")) {
+        cout << "Error with input\n"; // TODO: what to display?
+        return false;
+    }
+
     if (amount <= 0.0) {
         cout << "Cannot withdraw $0.00 or less\n";
         return false;
@@ -251,18 +251,14 @@ bool Bank::login() {
         cout << "Failed to get id\n";
         return false;
     }
-    Bank::Account login(id);
+    Bank::Account login;
+    login.id = id;
 
-    string name;
-    if (!get(name, "Enter your name: ")) {
-        cout << "Failed to get name";
-        return false;
-    }
-    if (!login.setName(name)){
+    if (!login.setName()){
         return false;
     }
 
-    current_account = unique_ptr<Bank::Account>(new Bank::Account());
+    current_account = unique_ptr<Bank::Account>(new Account());
     if (!raf.getRecord(id, current_account.get())) {
         cout << "Invalid login\n";
         return false;
@@ -291,23 +287,14 @@ bool Bank::createAccount() {
         // TODO: display msg here instead of from raf
         return false;
     }
-    current_account = unique_ptr<Bank::Account>(new Bank::Account(id));
+    current_account = unique_ptr<Bank::Account>(new Bank::Account());
+    current_account->id = id;
 
-    string name; // TODO: same as login above
-    if (!get(name, "Enter your name: ")) {
-        cout << "Failed to get name\n";
-        return false;
-    }
-    if (!current_account->setName(name)){
+    if (!current_account->setName()){
         return false;
     }
 
-    float initial_balance = 0.0;
-    if (!get(initial_balance, "Enter opening deposit amount: ")) {
-        cout << "Failed to get deposit amount\n";
-        return false;
-    }
-    current_account->deposit(initial_balance);
+    current_account->deposit("Enter opening deposit amount: ");
 
     if (!raf.createRecord(current_account.get())) {
         cout << "Failed to create account\n";
@@ -366,6 +353,7 @@ void Bank::displayBalance() {
         << current_account->balance << endl;
 }
 
+// TODO: update
 // === Bank::withdraw ==========================================================
 // This function withdraws money from an account.
 //
@@ -374,37 +362,17 @@ void Bank::displayBalance() {
 //
 // No Output.
 // =============================================================================
-void Bank::withdraw() {
-    float amount;
+void Bank::adjustBalance(bool is_deposit) {
+    bool failed = true;
 
-    if (!get(amount, "How much would you like to withdraw? ")) {
-        cout << "Error with input\n"; // TODO: what to display?
-        return;
+    if (is_deposit) {
+        failed = current_account->deposit();
+    }
+    else {
+        failed = current_account->withdraw();
     }
 
-    if (current_account->withdraw(amount)) {
-        raf.updateRecord(current_account.get());
-        displayBalance();
-    }
-}
-
-// === Bank::deposit ===========================================================
-// This function deposits money to an account.
-//
-// Input:
-//      account [IN/OUT]         -- the account to despoit to
-//
-// No Output.
-// =============================================================================
-void Bank::deposit() {
-    float amount;
-
-    if (!get(amount, "How much would you like to deposit? ")) {
-        cout << "Error with input\n"; // TODO: what to display?
-        return;
-    }
-
-    if (current_account->deposit(amount)) {
+    if (failed) {
         raf.updateRecord(current_account.get());
         displayBalance();
     }
