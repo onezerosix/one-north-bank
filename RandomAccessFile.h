@@ -44,12 +44,11 @@ public:
 // === RandomAccessFile ========================================================
 // This class represents the random access file.
 // =============================================================================
-template<class T>
 class RandomAccessFile {
 private:
     static const int MAX_RECORDS = 100; // TODO: move to be param of contructor?
     bitset<MAX_RECORDS> available_ids;
-    unique_ptr<T> dummy_record;
+    unique_ptr<RandomAccessFileRecord> dummy_record;
     size_t record_size;
 
     string file_name;
@@ -58,20 +57,17 @@ private:
     bool reserveId(int id);
     void releaseId(int id);
     //void serializeRecord(stringstream ss)
-    void updateFile(int id, T* record, bool update_available_ids = false);
+    void updateFile(int id, RandomAccessFileRecord* record, bool update_available_ids = false);
     int calculateOffset(int id, bool include_available_ids = true);
 
 public:
-    static_assert(is_base_of<RandomAccessFileRecord, T>::value, "T must derive from RandomAccessFileRecord");
-
-    RandomAccessFile(string file_name, unique_ptr<T> dummy_record);
+    RandomAccessFile(string file_name, unique_ptr<RandomAccessFileRecord> dummy_record);
 
     int getNextAvailableId();
-    bool createRecord(T* record);
-    bool deleteRecord(T* record);
-    bool getRecord(int id, T* record);
-    //void RandomAccessFile<T>::getRecord(int id, unique_ptr<T> &record) {
-    void updateRecord(T* record);
+    bool createRecord(RandomAccessFileRecord* record);
+    bool deleteRecord(RandomAccessFileRecord* record);
+    bool getRecord(int id, RandomAccessFileRecord* record);
+    void updateRecord(RandomAccessFileRecord* record);
 };
 
 
@@ -87,9 +83,8 @@ public:
 //
 // No Output.
 // =============================================================================
-template<class T>
-RandomAccessFile<T>::RandomAccessFile(string file_name, 
-    unique_ptr<T> dummy_record) {
+RandomAccessFile::RandomAccessFile(string file_name, 
+    unique_ptr<RandomAccessFileRecord> dummy_record) {
     this->file_name = file_name;
     this->dummy_record = move(dummy_record);
     record_size = this->dummy_record->getSize();
@@ -149,8 +144,7 @@ RandomAccessFile<T>::RandomAccessFile(string file_name,
 // Output:
 //      true if id was able to be reserved, otherwise false
 // =============================================================================
-template<class T>
-bool RandomAccessFile<T>::reserveId(int id) {
+bool RandomAccessFile::reserveId(int id) {
     id = id/10 -1;
     if (!available_ids[id]) {
         return false;
@@ -169,8 +163,7 @@ bool RandomAccessFile<T>::reserveId(int id) {
 //
 // Output: None
 // =============================================================================
-template<class T>
-void RandomAccessFile<T>::releaseId(int id) {
+void RandomAccessFile::releaseId(int id) {
     available_ids.set(id/10 - 1, true);
 }
 
@@ -182,8 +175,7 @@ void RandomAccessFile<T>::releaseId(int id) {
 // Output:
 //      int representing the next id if one was available, otherwise, -1
 // =============================================================================
-template<class T>
-int RandomAccessFile<T>::getNextAvailableId() {
+int RandomAccessFile::getNextAvailableId() {
     if (available_ids.none()) {
         cout << "No available ids\n";
         return -1;
@@ -214,8 +206,8 @@ int RandomAccessFile<T>::getNextAvailableId() {
 //
 // Output: None
 // =============================================================================
-template<class T> // TODO: bool return?
-void RandomAccessFile<T>::updateFile(int id, T* record,
+// TODO: bool return?
+void RandomAccessFile::updateFile(int id, RandomAccessFileRecord* record,
     bool update_available_ids /*= false*/) {
     file.open(file_name, ios::out | ios::in | ios::binary);
 
@@ -271,8 +263,7 @@ void RandomAccessFile<T>::updateFile(int id, T* record,
 // Output:
 //      int representing the offset of the record in bytes
 // =============================================================================
-template<class T>
-int RandomAccessFile<T>::calculateOffset(int id,
+int RandomAccessFile::calculateOffset(int id,
     bool include_available_ids /*= true*/) {
 
     int offset = (id/10 - 1) * record_size;
@@ -291,8 +282,7 @@ int RandomAccessFile<T>::calculateOffset(int id,
 // Output:
 //      true if the record was added, otherwise false
 // =============================================================================
-template<class T>
-bool RandomAccessFile<T>::createRecord(T* record) {
+bool RandomAccessFile::createRecord(RandomAccessFileRecord* record) {
     // TODO: validate record->getId
     int id = record->getId();
 
@@ -314,8 +304,7 @@ bool RandomAccessFile<T>::createRecord(T* record) {
 // Output:
 //      true if succeeded in deleting the record, otherwise false
 // =============================================================================
-template<class T>
-bool RandomAccessFile<T>::deleteRecord(T* record) { // TODO: password?
+bool RandomAccessFile::deleteRecord(RandomAccessFileRecord* record) { // TODO: password?
     // TODO: validate record->getId
     int id = record->getId();
 
@@ -341,8 +330,7 @@ bool RandomAccessFile<T>::deleteRecord(T* record) { // TODO: password?
 // Output:
 //      true if able to get the record, otherwise false
 // =============================================================================
-template<class T>
-bool RandomAccessFile<T>::getRecord(int id, T* record) {
+bool RandomAccessFile::getRecord(int id, RandomAccessFileRecord* record) {
     if (id < 10 || id > MAX_RECORDS * 10 || id % 10 != 0) {
         //cout << "Invalid id\n";
         return false;
@@ -375,8 +363,7 @@ bool RandomAccessFile<T>::getRecord(int id, T* record) {
 //
 // Output: None
 // =============================================================================
-template<class T>
-void RandomAccessFile<T>::updateRecord(T* record) {
+void RandomAccessFile::updateRecord(RandomAccessFileRecord* record) {
     // TODO: validate id?
     int id = record->getId();
     updateFile(id, record);

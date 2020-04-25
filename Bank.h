@@ -28,7 +28,7 @@ using namespace std; // TODO: remove since this file is a header
 class Bank {
 private:
     //static Account dummy_record(); // TODO: static?
-    RandomAccessFile<Account> raf;
+    RandomAccessFile raf;
 
 public:
     Bank(string ra_file_name);
