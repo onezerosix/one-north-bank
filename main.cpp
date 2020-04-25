@@ -21,7 +21,7 @@ static const string RAF_NAME = "accounts.raf";
 
 // function prototypes
 int main();
-void promptMenu(Bank &bank, Account &account);
+void promptMenu(Bank &bank);
 int loginRequested();
 
 // ==== main ===================================================================
@@ -31,22 +31,22 @@ int main() {
     Bank bank(RAF_NAME);
 
     int selection;
-    unique_ptr<Account> account = nullptr;
+    bool logged_in = false;
 
     while (selection = loginRequested()) {
         // TODO: probably a try catch
         if (selection == 1) {
-            account = bank.createAccount();
+            logged_in = bank.createAccount();
         }
         else {
-            account = bank.login();
+            logged_in = bank.login();
         }
-        if (account == nullptr) {
+        if (!logged_in) {
             // TODO: error msg
             continue;
         }
 
-        promptMenu(bank, *account);
+        promptMenu(bank);
     }
 
     cout << "Goodbye!\n";
@@ -56,7 +56,7 @@ int main() {
 // ==== promptMenu =============================================================
 //
 // =============================================================================
-void promptMenu(Bank &bank, Account &account) { // TODO: this function
+void promptMenu(Bank &bank) { // TODO: this function
     bool logging_out = false;
     int selection;
 
@@ -71,16 +71,16 @@ void promptMenu(Bank &bank, Account &account) { // TODO: this function
 
         switch (selection) {
             case 1:
-                bank.displayBalance(account);
+                bank.displayBalance();
                 break;
             case 2:
-                bank.deposit(account);
+                bank.deposit();
                 break;
             case 3:
-                bank.withdraw(account);
+                bank.withdraw();
                 break;
             case 4:
-                bank.closeAccount(account);
+                bank.closeAccount();
                 logging_out = true;
                 break;
             case 5:

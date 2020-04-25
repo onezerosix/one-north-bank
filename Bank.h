@@ -29,17 +29,19 @@ class Bank {
 private:
     //static Account dummy_record(); // TODO: static?
     RandomAccessFile raf;
+    unique_ptr<Account> current_account; // TODO: validate logged in?
+    // TODO: logout function?
 
 public:
     Bank(string ra_file_name);
 
-    unique_ptr<Account> login();
-    unique_ptr<Account> createAccount();
-    bool closeAccount(Account &account);
+    bool login();
+    bool createAccount();
+    bool closeAccount();
 
-    void displayBalance(Account account);
-    void withdraw(Account &account);
-    void deposit(Account &account);
+    void displayBalance();
+    void withdraw();
+    void deposit();
 };
 
 // === Bank::Bank ==============================================================
@@ -63,36 +65,36 @@ Bank::Bank(string ra_file_name) : raf(ra_file_name,
 //      pointer to account of the user if it was able to be located, otherwise
 //      nullptr
 // =============================================================================
-unique_ptr<Account> Bank::login() {
+bool Bank::login() {
     int id;
     if (!get(id, "Enter your id: ")) {
         cout << "Failed to get id\n";
-        return nullptr;
+        return false;
     }
     Account login(id);
 
     string name;
     if (!get(name, "Enter your name: ")) {
         cout << "Failed to get name";
-        return nullptr;
+        return false;
     }
     if (!login.setName(name)){
-        return nullptr;
+        return false;
     }
 
-    unique_ptr<Account> account(new Account());
-    if (!raf.getRecord(id, account.get())) {
+    current_account = unique_ptr<Account>(new Account());
+    if (!raf.getRecord(id, current_account.get())) {
         cout << "Invalid login\n";
-        return nullptr;
+        return false;
     }
 
-    if (strcmp(login.name, account->name) != 0) {
+    if (strcmp(login.name, current_account->name) != 0) {
         cout << "Invalid login\n";
-        return nullptr;
+        return false;
     }
 
-    displayBalance(*account);
-    return account;
+    displayBalance();
+    return true;
 }
 
 // ==== Bank::createAccount ====================================================
@@ -103,38 +105,38 @@ unique_ptr<Account> Bank::login() {
 // Output:
 //      pointer to the account that was created, otherwise nullptr
 // =============================================================================
-unique_ptr<Account> Bank::createAccount() {
+bool Bank::createAccount() {
     int id = raf.getNextAvailableId();
     if (id == -1) {
         // TODO: display msg here instead of from raf
-        return nullptr;
+        return false;
     }
-    unique_ptr<Account> account(new Account(id));
+    current_account = unique_ptr<Account>(new Account(id));
 
     string name; // TODO: same as login above
     if (!get(name, "Enter your name: ")) {
         cout << "Failed to get name\n";
-        return nullptr;
+        return false;
     }
-    if (!account->setName(name)){
-        return nullptr;
+    if (!current_account->setName(name)){
+        return false;
     }
 
     float initial_balance = 0.0;
     if (!get(initial_balance, "Enter opening deposit amount: ")) {
         cout << "Failed to get deposit amount\n";
-        return nullptr;
+        return false;
     }
-    account->deposit(initial_balance);
+    current_account->deposit(initial_balance);
 
-    if (!raf.createRecord(account.get())) {
+    if (!raf.createRecord(current_account.get())) {
         cout << "Failed to create account\n";
-        return nullptr;
+        return false;
     }
     
-    cout << "Your id is: " << account->id << endl;
-    displayBalance(*account);
-    return account;
+    cout << "Your id is: " << current_account->id << endl;
+    displayBalance();
+    return true;
 }
 
 // === Bank::closeAccount ======================================================
@@ -146,10 +148,10 @@ unique_ptr<Account> Bank::createAccount() {
 // Output:
 //      true if succeeded in closing the account, otherwise false
 // =============================================================================
-bool Bank::closeAccount(Account &account) {
+bool Bank::closeAccount() {
     cout << "This is the account you are about to close:\n" // display record
-        << account.id << " " << account.name << endl;
-    displayBalance(account);
+        << current_account->id << " " << current_account->name << endl;
+    displayBalance();
 
     char confirm;
     if (!get(confirm, 'n',
@@ -159,11 +161,11 @@ bool Bank::closeAccount(Account &account) {
 
     bool closed = false;
     if (confirm == 'y') {
-        closed = raf.deleteRecord(&account);
+        closed = raf.deleteRecord(current_account.get());
     }
 
     if (closed) {
-        account.reset();
+        current_account->reset();
         return true;
     }
 
@@ -179,9 +181,9 @@ bool Bank::closeAccount(Account &account) {
 //
 // No Output.
 // =============================================================================
-void Bank::displayBalance(Account account) {
+void Bank::displayBalance() {
     cout << "Your balance is: $" << setprecision(2) << fixed
-        << account.balance << endl;
+        << current_account->balance << endl;
 }
 
 // === Bank::withdraw ==========================================================
@@ -192,7 +194,7 @@ void Bank::displayBalance(Account account) {
 //
 // No Output.
 // =============================================================================
-void Bank::withdraw(Account &account) {
+void Bank::withdraw() {
     float amount;
 
     if (!get(amount, "How much would you like to withdraw? ")) {
@@ -200,9 +202,9 @@ void Bank::withdraw(Account &account) {
         return;
     }
 
-    if (account.withdraw(amount)) {
-        raf.updateRecord(&account);
-        displayBalance(account);
+    if (current_account->withdraw(amount)) {
+        raf.updateRecord(current_account.get());
+        displayBalance();
     }
 }
 
@@ -214,7 +216,7 @@ void Bank::withdraw(Account &account) {
 //
 // No Output.
 // =============================================================================
-void Bank::deposit(Account &account) {
+void Bank::deposit() {
     float amount;
 
     if (!get(amount, "How much would you like to deposit? ")) {
@@ -222,9 +224,9 @@ void Bank::deposit(Account &account) {
         return;
     }
 
-    if (account.deposit(amount)) {
-        raf.updateRecord(&account);
-        displayBalance(account);
+    if (current_account->deposit(amount)) {
+        raf.updateRecord(current_account.get());
+        displayBalance();
     }
 }
 
