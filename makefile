@@ -9,11 +9,12 @@ EXECUTABLE  := OneNorthBank
 
 all: $(BIN)/$(EXECUTABLE)
 
-run: ./$(BIN)/$(EXECUTABLE)
+run: 
+	./$(BIN)/$(EXECUTABLE)
 
 restart: clean all run
 
-fresh: cleaner run
+fresh: cleaner all run
 
 $(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
