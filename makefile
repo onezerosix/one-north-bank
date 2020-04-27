@@ -9,8 +9,11 @@ EXECUTABLE  := OneNorthBank
 
 all: $(BIN)/$(EXECUTABLE)
 
-run: clean all
-	./$(BIN)/$(EXECUTABLE)
+run: ./$(BIN)/$(EXECUTABLE)
+
+restart: clean all run
+
+fresh: cleaner run
 
 $(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
@@ -20,5 +23,3 @@ clean:
 
 cleaner: clean
 	rm accounts.raf -f
-
-fresh: cleaner run
