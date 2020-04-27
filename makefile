@@ -9,18 +9,20 @@ EXECUTABLE  := OneNorthBank
 
 build: $(BIN)/$(EXECUTABLE)
 
-run: 
+rebuild: clean build
+
+run:
 	./$(BIN)/$(EXECUTABLE)
 
-restart: clean build run
+restart: rebuild run
 
-fresh: cleaner build run
-
-$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
-	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
+reboot: destroy build run
 
 clean:
 	rm $(BIN)/* -f
 
-cleaner: clean
+destroy: clean
 	rm accounts.raf -f
+
+$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
+	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
