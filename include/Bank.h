@@ -23,6 +23,7 @@
 //#include "Cipher.h" // TODO
 using namespace std; // TODO: remove since this file is a header
 using namespace ral;
+using namespace utility;
 
 // === Bank ====================================================================
 // This class represents the bank.

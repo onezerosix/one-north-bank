@@ -8,7 +8,9 @@
 #include <iostream>
 #include <memory>
 #include "Bank.h"
+#include "Utilities.h"
 using namespace std;
+using namespace utility;
 
 // global variable
 static const string BANK_NAME = "One North Bank";
