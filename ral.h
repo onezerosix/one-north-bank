@@ -70,7 +70,7 @@ namespace ral {
 
         // ==== reserveId ======================================================
         // Sets an id to unavailable.
-        // =====================================================================
+        //
         // Parameters:
         //      id [IN]                 -- id to be reserved
         //
@@ -81,7 +81,7 @@ namespace ral {
 
         // ==== releaseId ======================================================
         // Sets an id to available.
-        // =====================================================================
+        //
         // Parameters:
         //      id [IN]                 -- id to be released
         //
@@ -106,7 +106,7 @@ namespace ral {
 
         // === calculateOffset =================================================
         // This function calculates where a record should be in the raf.
-        // =====================================================================
+        //
         // Parameters:
         //      id [IN]                 -- the id of the record
         //      include_available_ids [OPT IN]  
@@ -124,7 +124,7 @@ namespace ral {
         // === File ============================================================
         // This is the constructor. It creates a new raf or loads an existing
         // raf.
-        // =====================================================================
+        //
         // Parameters:
         //      file_name [VAL]         -- name of the raf
         //      dummy_record [REF]      -- a dummy record to be given to this
@@ -144,7 +144,7 @@ namespace ral {
 
         // ==== createRecord ===================================================
         // Adds a new record to the RAF if there is room for one.
-        // =====================================================================
+        //
         // Parameters:
         //      record [IN]             -- pointer to the record to be added
         //
@@ -155,7 +155,7 @@ namespace ral {
 
         // === deleteRecord ====================================================
         // Deletes a record from the raf if it's up to date.
-        // =====================================================================
+        //
         // Parameters:
         //      record [IN]             -- pointer to the record to be deleted
         //
