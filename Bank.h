@@ -12,6 +12,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <bitset>
 #include <math.h>
@@ -21,6 +22,7 @@
 #include "RandomAccessFile.h"
 //#include "Cipher.h" // TODO
 using namespace std; // TODO: remove since this file is a header
+using namespace ral;
 
 // === Bank ====================================================================
 // This class represents the bank.
@@ -40,7 +42,7 @@ private:
     // === Account =================================================================
     // This class represents one account.
     // =============================================================================
-    class Account : public RandomAccessFileRecord {
+    class Account : public Record {
     public:
 
         static const int MAX_NAME_SIZE = 100;
@@ -125,7 +127,7 @@ private:
         }
     };
 
-    RandomAccessFile raf;
+    File raf;
     unique_ptr<Bank::Account> current_account; // TODO: validate logged in?
     // TODO: logout function?
 };
