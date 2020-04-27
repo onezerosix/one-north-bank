@@ -1,8 +1,10 @@
 // =============================================================================
-// File: RandomAccessFile.h
+// File: ral.h
 // =============================================================================
 // Description:
-//      This header file hosts the utility functions for random access files.
+//      This header file hosts the random access library (ral) namespace. ///// which contains the
+//      File class definition that controls a random access file, and the
+//      abstract Record class that is used for the records in the random access file.
 // =============================================================================
 
 #ifndef RANDOMACCESSFILE_H
@@ -15,74 +17,96 @@
 #include <math.h>
 #include <memory>
 //#include "Cipher.h" // TODO
-using namespace std; // TODO: remove since this is a header
 // TODO: validating/santizing input
 
-// === RandomAccessFileRecord =================================
-// This class is the base for records in the random access file.
-// =============================================================================
-class RandomAccessFileRecord {
-public:
-    // === getId ===============================================================
-    // This function should be overridden in derived classes. It gets the id of
-    // the record.
-    //
-    // Input: None
-    //
-    // Output:
-    //      int representing the id the of the record
+namespace ral {
+    using namesspace std;
+
+    // === Record ==============================================================
+    // This abstract class is the base for records in the random access file.
     // =========================================================================
-    virtual int getId() = 0;
+    class Record {
+    public:
+        // === getId ===========================================================
+        // Parameters: None
+        //
+        // Return val:
+        //      int representing the id the of the record
+        // =====================================================================
+        virtual int getId() = 0;
 
-    virtual size_t getSize() = 0;
+        // === getSize =========================================================
+        // Parmeters: None
+        //
+        // Return val:
+        //      size_t equal to the size that a serialized record would be (in
+        //      bytes)
+        // =====================================================================
+        virtual size_t getSize() = 0;
 
-    virtual bool serialize(stringstream &ss) = 0;
+        // === serialize =======================================================
+        // Parmeters:
+        //      ss [REF]                -- stream where the serialized record
+        //                                  will be written to
+        //
+        // Return val:
+        //      true if able to serialize, otherwise false
+        // =====================================================================
+        virtual bool serialize(stringstream &ss) = 0;
 
-    virtual bool deserialize(stringstream &ss) = 0;
-};
+        // === deserialize =====================================================
+        // Parmeters:
+        //      ss [REF]                -- stream where a serialized record will
+        //                                  be read from
+        //
+        // Return val:
+        //      true if able to deserialize, otherwise false
+        // =====================================================================
+        virtual bool deserialize(stringstream &ss) = 0;
+    };
 
-// === RandomAccessFile ========================================================
-// This class represents the random access file.
-// =============================================================================
-class RandomAccessFile {
-private:
-    static const int MAX_RECORDS = 100; // TODO: move to be param of contructor?
-    bitset<MAX_RECORDS> available_ids;
-    unique_ptr<RandomAccessFileRecord> dummy_record;
-    size_t record_size;
+    // === File ================================================================
+    // This class controls a random access file of 100 records.
+    // =========================================================================
+    class File {
+    private:
+        static const int MAX_RECORDS = 100; // TODO: move to be adjustable
+        bitset<MAX_RECORDS> available_ids;
+        unique_ptr<Record> dummy_record;
+        size_t record_size;
 
-    string file_name;
-    fstream file;
+        string file_name;
+        fstream file;
 
-    bool reserveId(int id);
-    void releaseId(int id);
-    //void serializeRecord(stringstream ss)
-    void updateFile(int id, RandomAccessFileRecord* record, bool update_available_ids = false);
-    int calculateOffset(int id, bool include_available_ids = true);
+        bool reserveId(int id);
+        void releaseId(int id);
+        void updateFile(int id, Record* record,
+            bool update_available_ids = false);
+        int calculateOffset(int id, bool include_available_ids = true);
 
-public:
-    RandomAccessFile(string file_name, unique_ptr<RandomAccessFileRecord> dummy_record);
+    public:
+        // === File ============================================================
+        // This is the constructor. It creates a new raf or loads the existing
+        // raf.
+        // =========================================================================
+        // Input:
+        //      file_name [VAL]         -- name of the ra file
+        //      dummy_record [REF]      -- a dummy record to be given to this
+        //                                  class
+        //
+        // No Output.
+        // =============================================================================
+        File(string file_name, unique_ptr<Record> dummy_record);
 
-    int getNextAvailableId();
-    bool createRecord(RandomAccessFileRecord* record);
-    bool deleteRecord(RandomAccessFileRecord* record);
-    bool getRecord(int id, RandomAccessFileRecord* record);
-    void updateRecord(RandomAccessFileRecord* record);
-};
+        int getNextAvailableId();
+        bool createRecord(Record* record);
+        bool deleteRecord(Record* record);
+        bool getRecord(int id, Record* record);
+        void updateRecord(Record* record);
+    };
 
 
-// === RandomAccessFile::RandomAccessFile ======================================
-// This is the constructor for the RandomAccessFile class. It creates and
-// initializes the raf with n = MAX_RECORDS dummy records if needed or loads
-// the existing raf.
-//
-// Input:
-//      file_name [IN]                  -- name of the ra file
-//      dummy_record [IN]               -- the dummy record to be given to the
-//                                          RAF class
-//
-// No Output.
-// =============================================================================
+
 RandomAccessFile::RandomAccessFile(string file_name, 
     unique_ptr<RandomAccessFileRecord> dummy_record) {
     this->file_name = file_name;
@@ -367,6 +391,7 @@ void RandomAccessFile::updateRecord(RandomAccessFileRecord* record) {
     // TODO: validate id?
     int id = record->getId();
     updateFile(id, record);
+}
 }
 
 #endif // RANDOMACCESSFILE_H
