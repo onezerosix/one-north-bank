@@ -7,14 +7,14 @@ BIN     := bin
 EXECUTABLE  := OneNorthBank
 
 
-all: $(BIN)/$(EXECUTABLE)
+build: $(BIN)/$(EXECUTABLE)
 
 run: 
 	./$(BIN)/$(EXECUTABLE)
 
-restart: clean all run
+restart: clean build run
 
-fresh: cleaner all run
+fresh: cleaner build run
 
 $(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
