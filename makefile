@@ -16,9 +16,9 @@ $(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@
 
 clean:
-	rm $(BIN)/*
+	rm $(BIN)/* -f
 
-cleaner:
-	rm accounts.raf
+cleaner: clean
+	rm accounts.raf -f
 
 fresh: cleaner run
