@@ -19,7 +19,7 @@
 #include <memory>
 #include <limits>
 #include "Utilities.h"
-#include "RandomAccessFile.h"
+#include "ral.h"
 //#include "Cipher.h" // TODO
 using namespace std; // TODO: remove since this file is a header
 using namespace ral;

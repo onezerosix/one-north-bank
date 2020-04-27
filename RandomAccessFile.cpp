@@ -10,7 +10,7 @@
 #include <sstream>
 #include <bitset>
 #include <memory>
-#include "RandomAccessFile.h"
+#include "ral.h"
 //#include "Cipher.h" // TODO
 // TODO: validating/santizing input
 using namespace std;
