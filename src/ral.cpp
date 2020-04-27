@@ -19,20 +19,20 @@ using namespace ral;
 
 File::File(string file_name, 
     unique_ptr<Record> dummy_record) {
-    this->file_name = file_name;
+    this->file_name = file_name + FILE_EXTENSION;
     this->dummy_record = move(dummy_record);
     record_size = this->dummy_record->getSize();
 
-    if (fstream(file_name)) { // file already exists
+    if (fstream(this->file_name)) { // file already exists
         // TODO: not validating the input here
-        file.open(file_name, ios::in | ios::binary);
+        file.open(this->file_name, ios::in | ios::binary);
         file.read((char*)&available_ids, sizeof(available_ids));
         file.close();
         return;
     }
 
     available_ids.set();
-    file.open(file_name, ios::out | ios::binary);
+    file.open(this->file_name, ios::out | ios::binary);
     if (file.fail()) {
         cout << "Error opening file\nExiting\n";
         exit(-10); // TODO: change to something better than -10

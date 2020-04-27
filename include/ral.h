@@ -65,6 +65,7 @@ namespace ral {
         unique_ptr<Record> dummy_record;
         size_t record_size;
 
+        const string FILE_EXTENSION = ".raf"; // TODO: make static?
         string file_name;
         fstream file;
 
@@ -126,7 +127,7 @@ namespace ral {
         // raf.
         //
         // Parameters:
-        //      file_name [VAL]         -- name of the raf
+        //      file_name [VAL]         -- name of the raf (minus extension)
         //      dummy_record [REF]      -- a dummy record to be given to this
         //                                  class
         //

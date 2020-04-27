@@ -14,7 +14,7 @@ using namespace utility;
 
 // global variable
 static const string BANK_NAME = "One North Bank";
-static const string RAF_NAME = "accounts.raf";
+static const string RAF_NAME = "accounts";
 // static const enum loginOptions = { // TODO: this..
 //     quit = 0,
 //     create_account = 1,
