@@ -7,7 +7,7 @@
 // =============================================================================
 #include <ctime>
 #include <iostream>
-#include "Utilities.h"
+#include "utility.h"
 
 using namespace std;
 

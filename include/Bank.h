@@ -18,7 +18,7 @@
 #include <math.h>
 #include <memory>
 #include <limits>
-#include "Utilities.h"
+#include "utility.h"
 #include "ral.h"
 //#include "Cipher.h" // TODO
 using namespace std; // TODO: remove since this file is a header

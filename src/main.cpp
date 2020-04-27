@@ -8,7 +8,7 @@
 #include <iostream>
 #include <memory>
 #include "Bank.h"
-#include "Utilities.h"
+#include "utility.h"
 using namespace std;
 using namespace utility;
 
