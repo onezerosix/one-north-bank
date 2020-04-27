@@ -2,7 +2,7 @@
 // File: ral.cpp
 // =============================================================================
 // Description:
-//      This file implements the function(s) of the ral namespace.
+//      This file is the implementation of the ral namespace.
 // =============================================================================
 #include <string>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include "ral.h"
 //#include "Cipher.h" // TODO
 // TODO: validating/santizing input
+
 using namespace std;
 using namespace ral;
 
