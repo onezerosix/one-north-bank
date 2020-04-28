@@ -8,6 +8,12 @@
 #ifndef RAL_H
 #define RAL_H
 
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <bitset>
+#include <memory>
+
 namespace ral {
     using namespace std;
 

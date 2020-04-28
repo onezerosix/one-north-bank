@@ -4,17 +4,12 @@
 // Description:
 //      This file is the implementation of the ral namespace.
 // =============================================================================
-#include <string>
+
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <bitset>
-#include <memory>
 #include "ral.h"
 //#include "Cipher.h" // TODO
 // TODO: validating/santizing input
 
-using namespace std;
 using namespace ral;
 
 File::File(string file_name, 
