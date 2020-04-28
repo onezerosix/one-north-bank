@@ -2,35 +2,23 @@
 // File: Bank.h
 // =============================================================================
 // Description:
-//      This header file hosts the Bank class.
+//      This header file hosts the delcaration of the Bank class.
 // =============================================================================
 
 #ifndef BANK_H
 #define BANK_H
 
 #include <string>
-#include <cstring>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <bitset>
-#include <math.h>
+#include <iosfwd>
 #include <memory>
-#include <limits>
-#include "utility.h"
 #include "ral.h"
-#include "Bank.h"
-
-using namespace std;
-using namespace ral;
 
 // === Bank ====================================================================
 // This class represents the bank.
 // =============================================================================
 class Bank {
 public:
-    // === Bank::Bank ==============================================================
+    // === Bank ==============================================================
     // This is the constructor for the Bank class.
     //
     // Input:
@@ -38,9 +26,9 @@ public:
     //
     // No Output.
     // =============================================================================
-    Bank(string ra_file_name);
+    Bank(std::string ra_file_name);
 
-    // ==== Bank::login ============================================================
+    // ==== login ============================================================
     // This function logs a user into the bank by attempting to locate the user's
     // account.
     //
@@ -52,7 +40,7 @@ public:
     // =============================================================================
     bool login();
 
-    // ==== Bank::createAccount ====================================================
+    // ==== createAccount ====================================================
     // This function creates a new account if there is room for one.
     //
     // Input: None
@@ -62,7 +50,7 @@ public:
     // =============================================================================
     bool createAccount();
 
-    // === Bank::closeAccount ======================================================
+    // === closeAccount ======================================================
     // This functions closes an account and deletes a record from the raf.
     //
     // Input:
@@ -73,7 +61,7 @@ public:
     // =============================================================================
     bool closeAccount();
 
-    // === Bank::displayAccount ====================================================
+    // === displayAccount ====================================================
     // This function displays the balance of an account.
     //
     // Input:
@@ -83,7 +71,7 @@ public:
     // =============================================================================
     void displayBalance();
 
-    // === Bank::withdraw ==========================================================
+    // === withdraw ==========================================================
     // This function withdraws money from an account.
     //
     // Input:
@@ -97,9 +85,8 @@ private:
     // === Account =================================================================
     // This class represents one account.
     // =============================================================================
-    class Account : public Record {
+    class Account : public ral::Record {
     public:
-
         static const int MAX_NAME_SIZE = 100;
 
         int id;
@@ -145,7 +132,7 @@ private:
         // Output:
         //      true if the deposit was successful, otherwise false
         // =============================================================================
-        bool deposit(string promptMsg = "How much would you like to deposit? ");
+        bool deposit(std::string promptMsg = "How much would you like to deposit? ");
 
         // === Account::withdraw =======================================================
         // This function withdraws an amount from an account.
@@ -170,12 +157,12 @@ private:
 
         size_t getSize() override;
 
-        bool serialize(stringstream &ss) override;
-        bool deserialize(stringstream &ss) override;
+        bool serialize(std::stringstream &ss) override;
+        bool deserialize(std::stringstream &ss) override;
     };
 
-    File raf;
-    unique_ptr<Bank::Account> current_account; // TODO: validate logged in?
+    ral::File raf;
+    std::unique_ptr<Account> current_account; // TODO: validate logged in?
     // TODO: logout function?
 };
 

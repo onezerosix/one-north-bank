@@ -4,22 +4,14 @@
 // Description:
 //      This file implements the Bank class.
 // =============================================================================
-#include <string>
 #include <cstring>
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <bitset>
-#include <math.h>
-#include <memory>
 #include <limits>
 #include "utility.h"
-#include "ral.h"
 #include "Bank.h"
 
-using namespace std;
-using namespace ral;
 using namespace utility;
 
 Bank::Account::Account() {
