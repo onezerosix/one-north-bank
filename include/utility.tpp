@@ -7,11 +7,8 @@
 // =============================================================================
 #include <iostream>
 #include <limits>
-#include <string>
 
-template <class T> bool utility::get(T &input, std::string prompt_msg) {
-    using namespace std;
-
+template <class T> bool utility::get(T &input, string prompt_msg) {
     if (!prompt_msg.empty()) {
         cout << prompt_msg;
     }
@@ -31,9 +28,7 @@ template <class T> bool utility::get(T &input, std::string prompt_msg) {
     return successful;
 }
 
-template <class T> bool utility::get(T &input, T default_val, std::string prompt_msg) {
-    using namespace std;
-
+template <class T> bool utility::get(T &input, T default_val, string prompt_msg) {
     bool successful = get(input, prompt_msg);
     if (!successful) {
         input = default_val;

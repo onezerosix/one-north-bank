@@ -8,6 +8,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <string>
+
 namespace utility {
     using namespace std;
 
@@ -40,7 +42,7 @@ namespace utility {
     // Return val:
     //      true if no errors occured, otherwise false
     // =========================================================================
-    template <class T> bool get(T &input, T default_val, std::string prompt);
+    template <class T> bool get(T &input, T default_val, string prompt);
 
     // ==== printDateAndTime ===================================================
     // This function prints the date and time.
