@@ -6,6 +6,8 @@
 // =============================================================================
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include "ral.h"
 //#include "Cipher.h" // TODO
 // TODO: validating/santizing input

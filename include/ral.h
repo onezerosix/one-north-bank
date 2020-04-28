@@ -9,8 +9,8 @@
 #define RAL_H
 
 #include <string>
+#include <iosfwd>
 #include <fstream>
-#include <sstream>
 #include <bitset>
 #include <memory>
 
